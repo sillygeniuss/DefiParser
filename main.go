@@ -110,6 +110,10 @@ func main() {
 	coin1RealBalance := new(big.Float).Quo(coin1Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
 	fmt.Printf("coin1 real balance: %f\n", coin1RealBalance)
 
+	coin2Balance := new(big.Float).Mul(coin2PerRatio, fBalance)
+	coin2RealBalance := new(big.Float).Quo(coin2Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
+	fmt.Printf("coin1 real balance: %f\n", coin2RealBalance)
+
 	//poolRatio := new(big.Float).Quo(new(big.Float).SetInt(totalSupply), new(big.Float).SetInt(new(big.Int).Add(coinBalanceList[0], coinBalanceList[1])))
 	//fmt.Printf("pool ratio: %s\n", poolRatio.String())
 
