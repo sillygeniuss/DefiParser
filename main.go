@@ -1,19 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"math"
-	"math/big"
-	"walletForCurve/curve/pools/steth"
-	"walletForCurve/curve/registry/address"
 	"walletForCurve/curve/registry/meta"
-	"walletForCurve/curve/registry/pool"
 	"walletForCurve/node"
 )
-
-// Covalant 教程测试钱包地址
-var curveWalletAddr = "0x2702811b54ad6f58badbeb17007a1303a21af45f"
 
 // registry address lit
 var addressProviderRegistry = "0x0000000022D53366457F9d5E68Ec105046FC4383"
@@ -25,13 +18,29 @@ var stETHPoolAddress = "0xdc24316b9ae028f1497c275eb9192a3ea0f67022"
 var stETHTokenAddress = "0x06325440d014e39736583c165c2963ba99faf14e"
 var stETHGaugeAddress = "0x182b723a58739a9c974cfdb385ceadb237453c28"
 
+var (
+	flagConfig string
+)
+
+func initArgs() {
+	flag.StringVar(&flagConfig, "config", "./conf/config.yaml", "config file path")
+	flag.Parse()
+}
+
+func init() {
+	initArgs()
+	LoadConfig(flagConfig)
+}
+
 func main() {
 	// Create a new client
-	client, err := node.NewLocalClient()
-	if err != nil {
-		panic(err)
-	}
+	//client, err := node.NewLocalClient()
+	//if err != nil {
+	//	panic(err)
+	//}
 
+	fmt.Println(Config.Wallet)
+	return
 	// Get the latest block
 	//block, err := client.GetCurrentBlock()
 	//if err != nil {
@@ -48,71 +57,71 @@ func main() {
 	//fmt.Printf("curve wallet balance: %s\n", asset)
 
 	// Output:获取功能registry列表
-	addressProvider, e := address.NewAddressProvider(common.HexToAddress(addressProviderRegistry), client)
-	if e != nil {
-		panic(e)
-	}
-
-	// Output: 创建pool registry实例
-	poolRegistryAddr, _ := addressProvider.GetAddress(nil, big.NewInt(0))
-	fmt.Printf("main registry address: %s\n", poolRegistryAddr.Hex())
-
-	poolIns, _ := pool.NewPool(poolRegistryAddr, client)
-	poolCount, _ := poolIns.PoolCount(nil)
-	// todo 这里poolCount拿到的值跟官方浏览器对不上，需要进一步确认
-	fmt.Printf("pool account: %d\n", poolCount.Int64())
-
-	/** ====================================================================================================================================== */
-	// 使用Meta Registry进行Curve交互
-	metaRegIns, e := InitMetaIns(client)
-	if e != nil {
-		panic("init meta registry error: " + e.Error())
-	}
-
-	// 获取pool名称
-	addr := "0xDC24316b9AE028F1497c275EB9192a3Ea0f67022"
-	poolName, e := metaRegIns.GetPoolName(nil, common.HexToAddress(addr))
-	if e != nil {
-		panic(e)
-	}
-	fmt.Printf("pool name: %s\n", poolName)
-
-	// output wallet steCRV balance
-	tokenIns, _ := steth.NewToken(common.HexToAddress(stETHTokenAddress), client)
-	balance, _ := tokenIns.BalanceOf(nil, common.HexToAddress(curveWalletAddr))
-
-	decimal, _ := tokenIns.Decimals(nil)
-
-	fBalance := new(big.Float).SetInt(balance)
-	realBalance := new(big.Float).Quo(fBalance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
-	fmt.Printf("stETH real steCRV balance: %f\n", realBalance)
-
-	// output lp token total supply
-	totalSupply, _ := tokenIns.TotalSupply(nil)
-
-	// output: pool coin address list
-	poolCoinAddrList, _ := poolIns.GetCoins(nil, common.HexToAddress(addr))
-	fmt.Printf("pool coin address list: %s\n", poolCoinAddrList)
-
-	// output pool coin info
-	poolCoinBalanceList, _ := poolIns.GetBalances(nil, common.HexToAddress(addr))
-	fmt.Printf("pool coin balance list: %s\n", poolCoinBalanceList)
-
-	// 分别计算池中两种Token的单位比例
-	coin1PerRatio := new(big.Float).Quo(new(big.Float).SetInt(poolCoinBalanceList[0]), new(big.Float).SetInt(totalSupply))
-	fmt.Printf("coin1 per ratio: %f\n", coin1PerRatio)
-
-	coin2PerRatio := new(big.Float).Quo(new(big.Float).SetInt(poolCoinBalanceList[1]), new(big.Float).SetInt(totalSupply))
-	fmt.Printf("coin2 per ratio: %f\n", coin2PerRatio)
-
-	// 计算当前钱包中的lp Token总量下对应的各币种数量
-	coin1Balance := new(big.Float).Mul(coin1PerRatio, fBalance)
-	coin1RealBalance := new(big.Float).Quo(coin1Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
-	fmt.Printf("coin1 real balance: %f\n", coin1RealBalance)
-
-	coin2Balance := new(big.Float).Mul(coin2PerRatio, fBalance)
-	coin2RealBalance := new(big.Float).Quo(coin2Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
-	fmt.Printf("coin1 real balance: %f\n", coin2RealBalance)
+	//addressProvider, e := address.NewAddressProvider(common.HexToAddress(addressProviderRegistry), client)
+	//if e != nil {
+	//	panic(e)
+	//}
+	//
+	//// Output: 创建pool registry实例
+	//poolRegistryAddr, _ := addressProvider.GetAddress(nil, big.NewInt(0))
+	//fmt.Printf("main registry address: %s\n", poolRegistryAddr.Hex())
+	//
+	//poolIns, _ := pool.NewPool(poolRegistryAddr, client)
+	//poolCount, _ := poolIns.PoolCount(nil)
+	//// todo 这里poolCount拿到的值跟官方浏览器对不上，需要进一步确认
+	//fmt.Printf("pool account: %d\n", poolCount.Int64())
+	//
+	///** ====================================================================================================================================== */
+	//// 使用Meta Registry进行Curve交互
+	//metaRegIns, e := InitMetaIns(client)
+	//if e != nil {
+	//	panic("init meta registry error: " + e.Error())
+	//}
+	//
+	//// 获取pool名称
+	//addr := "0xDC24316b9AE028F1497c275EB9192a3Ea0f67022"
+	//poolName, e := metaRegIns.GetPoolName(nil, common.HexToAddress(addr))
+	//if e != nil {
+	//	panic(e)
+	//}
+	//fmt.Printf("pool name: %s\n", poolName)
+	//
+	//// output wallet steCRV balance
+	//tokenIns, _ := steth.NewToken(common.HexToAddress(stETHTokenAddress), client)
+	////balance, _ := tokenIns.BalanceOf(nil, common.HexToAddress(curveWalletAddr))
+	//
+	//decimal, _ := tokenIns.Decimals(nil)
+	//
+	//fBalance := new(big.Float).SetInt(balance)
+	//realBalance := new(big.Float).Quo(fBalance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
+	//fmt.Printf("stETH real steCRV balance: %f\n", realBalance)
+	//
+	//// output lp token total supply
+	//totalSupply, _ := tokenIns.TotalSupply(nil)
+	//
+	//// output: pool coin address list
+	//poolCoinAddrList, _ := poolIns.GetCoins(nil, common.HexToAddress(addr))
+	//fmt.Printf("pool coin address list: %s\n", poolCoinAddrList)
+	//
+	//// output pool coin info
+	//poolCoinBalanceList, _ := poolIns.GetBalances(nil, common.HexToAddress(addr))
+	//fmt.Printf("pool coin balance list: %s\n", poolCoinBalanceList)
+	//
+	////// 分别计算池中两种Token的单位比例
+	//coin1PerRatio := new(big.Float).Quo(new(big.Float).SetInt(poolCoinBalanceList[0]), new(big.Float).SetInt(totalSupply))
+	//fmt.Printf("coin1 per ratio: %f\n", coin1PerRatio)
+	//
+	//coin2PerRatio := new(big.Float).Quo(new(big.Float).SetInt(poolCoinBalanceList[1]), new(big.Float).SetInt(totalSupply))
+	//fmt.Printf("coin2 per ratio: %f\n", coin2PerRatio)
+	//
+	//// 计算当前钱包中的lp Token总量下对应的各币种数量
+	//coin1Balance := new(big.Float).Mul(coin1PerRatio, fBalance)
+	//coin1RealBalance := new(big.Float).Quo(coin1Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
+	//fmt.Printf("coin1 real balance: %f\n", coin1RealBalance)
+	//
+	//coin2Balance := new(big.Float).Mul(coin2PerRatio, fBalance)
+	//coin2RealBalance := new(big.Float).Quo(coin2Balance, big.NewFloat(math.Pow10(int(decimal.Int64()))))
+	//fmt.Printf("coin1 real balance: %f\n", coin2RealBalance)
 
 	//poolRatio := new(big.Float).Quo(new(big.Float).SetInt(totalSupply), new(big.Float).SetInt(new(big.Int).Add(coinBalanceList[0], coinBalanceList[1])))
 	//fmt.Printf("pool ratio: %s\n", poolRatio.String())
